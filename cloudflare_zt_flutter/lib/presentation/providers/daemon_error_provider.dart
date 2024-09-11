@@ -1,9 +1,5 @@
-import 'package:cloudflare_zt_flutter/presentation/providers/status_check_notifier.dart';
-import 'package:cloudflare_zt_flutter/presentation/providers/vpn_action_notifier.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'daemon_error_provider.g.dart';
 part 'daemon_error_provider.freezed.dart';
 
 enum ErrorSource {
@@ -45,40 +41,3 @@ VpnErrorState? combinedVpnErrorProvider(CombinedVpnErrorProviderRef ref) {
   return null;
 }
 */
-
-@riverpod
-class CombinedVpnErrorNotifier extends _$CombinedVpnErrorNotifier {
-  @override
-  FutureOr<void> build() async {
-    // Initialize state to null or AsyncData to indicate no errors
-    state = const AsyncData(null);
-
-    // Watch for errors from both providers and combine them
-    ref.listen<AsyncValue<DaemonStatusState>>(statusCheckProvider, (previous, next) {
-      if (next.value != null) {
-        state = AsyncValue.error(
-            VpnErrorState(
-              message: next.value!.errorMessage.toString(),
-              source: ErrorSource.statusCheck,
-            ),
-            next.stackTrace ?? StackTrace.current);
-      }
-    });
-
-    ref.listen<AsyncValue<DaemonStatusState>>(vpnActionNotifierProvider, (previous, next) {
-      if (next.value != null && next.value!.errorMessage != null) {
-        state = AsyncValue.error(
-            VpnErrorState(
-              message: next.value!.errorMessage.toString(),
-              source: ErrorSource.vpnAction,
-            ),
-            next.stackTrace ?? StackTrace.current);
-      }
-    });
-  }
-
-  // Optional: a method to clear errors and reset state
-  void clearError() {
-    state = const AsyncData(null);
-  }
-}
