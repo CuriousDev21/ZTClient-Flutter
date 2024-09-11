@@ -17,10 +17,8 @@ class VpnActionNotifier extends _$VpnActionNotifier {
 
   @override
   Future<DaemonStatusState> build() async {
-    _sub = Stream.periodic(const Duration(seconds: 5)).listen((_) async {
-      if (state is AsyncLoading) return;
-      state = await AsyncValue.guard(() => _fetchStatus());
-    });
+    _sub = Stream.periodic(const Duration(seconds: 5))
+        .listen((_) async => state = await AsyncValue.guard(() => _fetchStatus()));
     ref.onDispose(() => _sub?.cancel());
 
     return const DaemonStatusState(
@@ -38,7 +36,6 @@ class VpnActionNotifier extends _$VpnActionNotifier {
       final status = await vpnRepo.getStatus();
 
       // Handle the successful "disconnected" with an error message case
-      print(status);
       return status.map(
         connected: (_) => const DaemonStatusState(
           statusMessage: 'Connected',
@@ -73,6 +70,7 @@ class VpnActionNotifier extends _$VpnActionNotifier {
 
   // Connect to VPN Daemon
   Future<void> connect() async {
+    _sub?.cancel();
     state = const AsyncLoading(); // Set loading state while performing the action
 
     try {
@@ -96,6 +94,9 @@ class VpnActionNotifier extends _$VpnActionNotifier {
     } catch (e, s) {
       state = AsyncValue.error('Failed to connect to VPN', s);
     }
+
+    _sub = Stream.periodic(const Duration(seconds: 5))
+        .listen((_) async => state = await AsyncValue.guard(() => _fetchStatus()));
   }
 
   // Disconnect from VPN Daemon
