@@ -82,6 +82,8 @@ class SocketService {
 
     // Read the size of the payload
     final sizeBytes = _buffer.sublist(0, 8);
+
+    // compute the size of the payload with platform endianness consideration
     final size = ByteData.sublistView(Uint8List.fromList(sizeBytes)).getInt64(0, Endian.host);
 
     if (_buffer.length - 8 < size) return null; // Wait until the full payload arrives

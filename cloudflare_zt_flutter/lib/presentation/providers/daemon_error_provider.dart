@@ -1,6 +1,5 @@
 import 'package:cloudflare_zt_flutter/presentation/providers/status_check_notifier.dart';
 import 'package:cloudflare_zt_flutter/presentation/providers/vpn_action_notifier.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

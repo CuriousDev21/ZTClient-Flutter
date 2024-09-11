@@ -21,7 +21,7 @@ class MaterialContext extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: DaemonStatusScreen(),
+      home: const DaemonStatusScreen(),
     );
   }
 }

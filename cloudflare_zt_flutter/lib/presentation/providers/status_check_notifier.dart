@@ -49,7 +49,7 @@ Future<DaemonStatusState> statusCheck(StatusCheckRef ref) async {
     );
   } catch (e) {
     // Return a DaemonStatusState with a generic error message
-    return DaemonStatusState(
+    return const DaemonStatusState(
       statusMessage: 'Disconnected',
       errorMessage: 'Failed to check VPN status',
       isConnected: false,

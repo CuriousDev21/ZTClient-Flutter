@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloudflare_zt_flutter/domain/models/daemon/daemon_status.dart';
 import 'package:cloudflare_zt_flutter/presentation/providers/daemon_error_provider.dart';
 import 'package:cloudflare_zt_flutter/presentation/providers/status_check_notifier.dart';
 import 'package:cloudflare_zt_flutter/presentation/providers/vpn_action_notifier.dart';
