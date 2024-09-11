@@ -1,5 +1,6 @@
 import 'package:cloudflare_zt_flutter/application/services/api_config.dart';
 import 'package:cloudflare_zt_flutter/application/services/network_client.dart';
+import 'package:cloudflare_zt_flutter/core/utils/logger/app_logger.dart';
 import 'package:cloudflare_zt_flutter/domain/errors/data_source_exception.dart';
 import 'package:cloudflare_zt_flutter/domain/errors/network_exception.dart';
 import 'package:cloudflare_zt_flutter/domain/models/auth/auth_token.dart';
@@ -24,7 +25,7 @@ class AuthService {
           'X-Auth-Key': '3735928559',
         },
       );
-
+      logger.info("Successfully fetched new auth token from the server.");
       return AuthToken(
         token: response.data['data']['auth_token'].toString(),
         timestamp: DateTime.now(),

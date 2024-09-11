@@ -1,3 +1,4 @@
+import 'package:cloudflare_zt_flutter/core/utils/logger/app_logger.dart';
 import 'package:cloudflare_zt_flutter/domain/errors/network_exception.dart';
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -41,11 +42,13 @@ class NetworkClient {
             data: requestBody, queryParameters: queryParameters, options: options, cancelToken: cancelToken),
       };
     } on DioException catch (e) {
+      logger.error("Error during $requestType request to $url: ${e.message}");
       throw DioNetworkingException.fromDioException(e);
     }
   }
 
   void cancelRequests() {
+    logger.info("Cancelling all requests.");
     cancelToken.cancel("Request was cancelled");
   }
 }
