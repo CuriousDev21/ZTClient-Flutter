@@ -17,8 +17,7 @@ class VpnActionNotifier extends _$VpnActionNotifier {
 
   @override
   Future<DaemonStatusState> build() async {
-    _sub = Stream.periodic(const Duration(seconds: 5))
-        .listen((_) async => state = await AsyncValue.guard(() => _fetchStatus()));
+    _listenToStream();
     ref.onDispose(() => _sub?.cancel());
 
     return const DaemonStatusState(
@@ -26,6 +25,11 @@ class VpnActionNotifier extends _$VpnActionNotifier {
       isConnected: false,
     );
   }
+
+  void _listenToStream() => _sub = Stream.periodic(const Duration(seconds: 5)).listen((_) async {
+        final newState = await AsyncValue.guard(() => _fetchStatus());
+        if (_sub?.isPaused == false) state = newState;
+      });
 
   Future<DaemonStatusState> _fetchStatus() async {
     // Ensure the timer is cleaned up when the provider is disposed
@@ -95,12 +99,12 @@ class VpnActionNotifier extends _$VpnActionNotifier {
       state = AsyncValue.error('Failed to connect to VPN', s);
     }
 
-    _sub = Stream.periodic(const Duration(seconds: 5))
-        .listen((_) async => state = await AsyncValue.guard(() => _fetchStatus()));
+    _listenToStream();
   }
 
   // Disconnect from VPN Daemon
   Future<void> disconnect() async {
+    _sub?.cancel();
     state = const AsyncLoading();
 
     try {
@@ -120,6 +124,7 @@ class VpnActionNotifier extends _$VpnActionNotifier {
     } catch (e, s) {
       state = AsyncValue.error('Failed to discconnect from the VPN', s);
     }
+    _listenToStream();
   }
 
   // Helper method to fetch and cache the token
