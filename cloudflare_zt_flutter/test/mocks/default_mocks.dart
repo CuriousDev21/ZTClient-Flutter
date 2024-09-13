@@ -69,7 +69,7 @@ Future<void> setupDefaultMocksBehavior() async {
 
   // Mock AuthService behavior
   mockAuthService = MockAuthService();
-  when(() => mockAuthService.getAuthToken())
+  when(() => mockAuthService.getRemoteAuthToken())
       .thenAnswer((_) async => AuthToken(token: '245346444925233', timestamp: DateTime.now()));
 
   // Mock TokenRepository
