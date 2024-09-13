@@ -16,18 +16,19 @@ import '../../mocks/socket_service_mock.dart';
 void main() {
   late SocketService socketService;
 
-  setUp(() {
+  setUp(() async {
     // Initialize the global mock setup
-    setupDefaultMocksBehavior();
-    mockSocketConnect(); // Set up the mock Socket.connect behavior
+    await setupDefaultMocksBehavior();
+
+    // Set up the mock Socket.connect behavior
+    mockSocketConnect();
+
+    // Register fallback values
     registerFallbackValue(<int>[]);
     registerFallbackValue(Uint8List(0));
 
-    // Initialize the real SocketService with mockConnect
+    // Initialize the real SocketService with mockConnect and mockSocket
     socketService = SocketService(connect: mockConnect, socket: mockSocket);
-
-    // Mock socket behavior
-    mockSocketBehavior(mockSocket);
   });
 
   group('SocketService - Mocked Socket Tests', () {

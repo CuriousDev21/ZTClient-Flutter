@@ -14,6 +14,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Mock classes
+
+// Mock classes
 class MockTokenRepository extends Mock implements TokenRepository {}
 
 class MockAuthService extends Mock implements AuthService {}
@@ -40,39 +42,34 @@ late MockStreamSubscription mockStreamSubscription;
 late MockTSocket mockSocket;
 late Future<Socket> Function(InternetAddress, int) mockConnect;
 
-// Fallback values registration for complex objects
+// Fallback values registration
 void registerFallbackValues() {
   registerFallbackValue(FakeAuthToken());
 }
 
-// Centralized Mock Setup Function
-Future<void> setupDefaultMocksBehavior() async {
-  // Register fallback values
-  registerFallbackValues();
-
-  // Initialize mocks
-  mockSocket = MockTSocket();
+// Setup behavior for each mock group
+Future<void> setupMockSocketService() async {
   mockSocketService = MockSocketService();
-  mockStreamSubscription = MockStreamSubscription();
-
-  // Mock SocketService behavior
   when(() => mockSocketService.connect(any())).thenAnswer((_) async {});
   when(() => mockSocketService.disconnect()).thenAnswer((_) async {});
   when(() => mockSocketService.getStatus()).thenAnswer((_) async => const DaemonStatus.connected());
+}
 
-  // Mock SecureStorageService behavior
+Future<void> setupMockSecureStorageService() async {
   mockSecureStorageService = MockSecureStorageService();
   when(() => mockSecureStorageService.read(key: any(named: 'key'))).thenAnswer((_) async => null);
   when(() => mockSecureStorageService.write(key: any(named: 'key'), value: any(named: 'value')))
       .thenAnswer((_) async {});
   when(() => mockSecureStorageService.delete(key: any(named: 'key'))).thenAnswer((_) async {});
+}
 
-  // Mock AuthService behavior
+Future<void> setupMockAuthService() async {
   mockAuthService = MockAuthService();
   when(() => mockAuthService.getRemoteAuthToken())
       .thenAnswer((_) async => AuthToken(token: '245346444925233', timestamp: DateTime.now()));
+}
 
-  // Mock TokenRepository
+Future<void> setupMockTokenRepository() async {
   mockTokenRepository = MockTokenRepository();
   when(() => mockTokenRepository.getAuthToken())
       .thenAnswer((_) async => AuthToken(token: '245346444925233', timestamp: DateTime.now()));
@@ -80,37 +77,47 @@ Future<void> setupDefaultMocksBehavior() async {
   when(() => mockTokenRepository.discardToken()).thenAnswer((_) async {});
 }
 
-// Mocking Socket behavior
-void mockSocketBehavior(MockTSocket mockSocket) {
+// Centralized mock behavior setup
+Future<void> setupDefaultMocksBehavior() async {
+  registerFallbackValues();
+  await setupMockSocketService();
+  await setupMockSecureStorageService();
+  await setupMockAuthService();
+  await setupMockTokenRepository();
+}
+
+// Mock Socket behavior
+void mockSocketBehavior() {
   mockStreamSubscription = MockStreamSubscription();
 
-  // Mock the listen method to trigger the response with data
   when(() => mockSocket.listen(any(), onError: any(named: 'onError'), onDone: any(named: 'onDone')))
       .thenAnswer((invocation) {
     final callback = invocation.positionalArguments[0] as void Function(Uint8List);
 
-    // Simulate the daemon response after the connection
     final mockResponse = json.encode({
       "status": "success",
       "data": {"daemon_status": "connected"}
     });
 
-    // Trigger the callback with the simulated response
     callback(Uint8List.fromList(utf8.encode(mockResponse)));
 
     return mockStreamSubscription;
   });
 
-  // Mock the subscription cancellation
   when(() => mockStreamSubscription.cancel()).thenAnswer((_) async {});
-
-  // Mock the lifecycle methods
   when(() => mockSocket.add(any())).thenAnswer((_) async {});
   when(() => mockSocket.flush()).thenAnswer((_) async {});
 }
 
-// Mocking Socket.connect behavior
+// Mock Socket.connect behavior
 void mockSocketConnect() {
-  // Simulate Socket.connect behavior to return a mock socket.
+  mockSocket = MockTSocket();
   mockConnect = (InternetAddress address, int port) async => mockSocket;
+}
+
+// Use this function in test files to set up the mocks
+void setUpMocks() {
+  setUpAll(() async {
+    await setupDefaultMocksBehavior();
+  });
 }
