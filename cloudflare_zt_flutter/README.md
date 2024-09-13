@@ -233,7 +233,7 @@ flutter test
 The application has already been packaged as a **DMG (Disk Image)** file, which is included in the `releases/` folder of this repository.
 
 ### Steps to Install the DMG:
-1. Navigate to the `releases/` folder in this repository.
+1. Navigate to the `releases/` folder in this repository's Flutter project folder  `cloudflare_zt_flutter/`.
 2. Find the file `VPNControl-Flutter.dmg`.
 3. Double-click to open the DMG file.
 4. Open it directly or Drag and drop the app into your Applications folder.
