@@ -200,7 +200,7 @@ flutter test
 ```
 
 ### Key Testing Areas:
-- **Daemon Interaction**: Ensures that the app can successfully communicate with the VPN daemon.
+- **Daemon Interaction**: Ensures that the app can effectively communicate with the VPN daemon and handle edge cases.
 - **Error Handling**: Ensures that errors from the daemon are handled appropriately and shown to the user.
 - **Token Management**: Ensures the auth token is fetched, cached, and refreshed as needed.
 
