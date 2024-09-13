@@ -1,4 +1,5 @@
 import 'package:cloudflare_zt_flutter/core/utils/logger/app_logger.dart';
+import 'package:cloudflare_zt_flutter/core/utils/logger/network_logger.dart';
 import 'package:cloudflare_zt_flutter/domain/errors/network_exception.dart';
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -14,7 +15,7 @@ class NetworkClient {
       baseUrl: 'https://warp-registration.warpdir2792.workers.dev/',
       receiveTimeout: const Duration(minutes: 1),
     ),
-  )..interceptors.addAll([LogInterceptor(responseHeader: false, responseBody: true)]);
+  )..interceptors.addAll([FormattedNetworkLogger()]);
 
   final CancelToken cancelToken = CancelToken();
 
