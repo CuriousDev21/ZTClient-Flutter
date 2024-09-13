@@ -4,6 +4,14 @@ enum DaemonResponseStatus { success, error }
 
 /// The response model for daemon responses, handling both general responses
 /// and nested structures within the `data` field.
+///  - [status] is the status of the response.
+/// - [data] is the nested structure within the `data` field.
+/// - [message] is the message of the response.
+///  - [DaemonDataResponse] is the nested structure within the `data` field.
+/// - [daemonStatus] is the status of the daemon.
+/// - [message] is the message of the response.
+///  - [DaemonResponseStatus] is the status of the response.
+/// - [success] is the success status.
 class DaemonResponse {
   final DaemonResponseStatus status;
   final DaemonDataResponse? data; // Now the data field can have a structured model
@@ -35,6 +43,8 @@ class DaemonResponse {
 }
 
 /// Model for the nested structure within the `data` field of [DaemonResponse].
+/// - [daemonStatus] is the status of the daemon.
+/// - [message] is the message of the response.
 class DaemonDataResponse {
   final String? daemonStatus;
   final String? message;

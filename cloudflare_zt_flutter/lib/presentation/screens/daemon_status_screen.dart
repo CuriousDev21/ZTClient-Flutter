@@ -5,6 +5,9 @@ import 'package:cloudflare_zt_flutter/presentation/providers/vpn_action_notifier
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Screen for checking the status of the VPN daemon.
+/// The screen displays the current status of the VPN daemon and allows the user to connect or disconnect from the VPN.
+///
 class DaemonStatusScreen extends ConsumerStatefulWidget {
   const DaemonStatusScreen({super.key});
 

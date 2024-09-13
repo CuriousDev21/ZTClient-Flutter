@@ -5,6 +5,15 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'data_source_exception.freezed.dart';
 
+/// Exception thrown by data sources
+///  - [ServerException] when server returns an error
+///  - [ConnectionException] when there is a connection error
+/// - [UnauthorizedException] when the request is unauthorized
+/// - [ForbiddenException] when the request is forbidden
+/// - [UnknownException] when the error is unknown
+/// - [BusyException] when the server is busy
+/// - [DataSourceException] when the error is unknown
+///
 @freezed
 class DataSourceException with _$DataSourceException {
   const factory DataSourceException.serverError({String? message}) = _ServerException;

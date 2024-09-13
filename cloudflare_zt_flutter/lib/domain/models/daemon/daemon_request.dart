@@ -1,5 +1,10 @@
 import 'dart:convert';
 
+/// A class representing a request to the daemon
+///   - [connect] request to connect to the daemon
+///   - [disconnect] request to disconnect from the daemon
+///  - [getStatus] request to get the status of the daemon
+///   - [request] the request payload
 class DaemonRequest {
   final Map<String, dynamic> request;
 

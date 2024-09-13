@@ -1,6 +1,16 @@
 // path: lib/domain/errors/dio_networking_exception.dart
 import 'package:dio/dio.dart';
 
+/// Exception thrown by Dio networking
+/// - [DioNetworkingException] when there is a networking error
+/// - [DioExceptionType] when the error type is known
+///  - [DioExceptionType.cancel] when the request is cancelled
+/// - [DioExceptionType.connectTimeout] when the connection times out
+/// - [DioExceptionType.receiveTimeout] when the response times out
+/// - [DioExceptionType.sendTimeout] when the request times out
+/// - [DioExceptionType.response] when the response is invalid
+/// - [DioExceptionType.other] when the error is unknown
+/// - [DioExceptionType.unknown] when the error is unknown
 class DioNetworkingException implements Exception {
   final String message;
   final int? statusCode;

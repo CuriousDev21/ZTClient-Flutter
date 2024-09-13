@@ -5,6 +5,11 @@ part 'daemon_status.freezed.dart';
 
 enum DaemonConnectionStatus { connected, disconnected, error }
 
+/// Represents the status of the daemon connection
+/// - [connected] when the daemon is connected
+/// - [disconnected] when the daemon is disconnected
+/// - [error] when there is an error
+///  - [message] contains the error message from the daemon
 @freezed
 class DaemonStatus with _$DaemonStatus {
   const factory DaemonStatus.connected() = _Connected;

@@ -11,6 +11,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'vpn_action_notifier.freezed.dart';
 part 'vpn_action_notifier.g.dart';
 
+/// Notifier that handles the VPN actions
+///  - Connect to VPN Daemon
+/// - Disconnect from VPN Daemon
+/// - Fetch the current status of the VPN Daemon
+/// - Listen to the status of the VPN Daemon
+/// - Notify the UI about the status of the VPN Daemon
 @riverpod
 class VpnActionNotifier extends _$VpnActionNotifier {
   StreamSubscription? _sub;
