@@ -44,7 +44,7 @@ The project is divided into the following layers:
 - **Data Layer**: Responsible for interacting with external services like the VPN daemon or token repositories.
 
 The following diagram illustrates the flow of data and interactions between these layers:
-![Architecture Diagram](../diagrams/component-diagram.png)
+![Architecture Diagram](/diagrams/component-diagram.png)
 
 ## Folder Structure
 
