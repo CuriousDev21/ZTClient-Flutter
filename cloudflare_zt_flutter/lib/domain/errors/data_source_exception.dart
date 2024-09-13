@@ -1,4 +1,5 @@
 import 'package:cloudflare_zt_flutter/domain/errors/network_exception.dart';
+import 'package:cloudflare_zt_flutter/domain/models/daemon/daemon_response.dart';
 import 'package:dio/dio.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -30,9 +31,9 @@ class DataSourceException with _$DataSourceException {
     };
   }
 
-  static DataSourceException fromDaemonResponse(Map<String, dynamic> response) {
-    final status = response['status'];
-    final message = response['message'] ?? 'Unknown error';
+  static DataSourceException fromDaemonResponse(DaemonResponse response) {
+    final status = response.status.name;
+    final message = response.message ?? 'Unknown error';
 
     switch (status) {
       case 'error':
