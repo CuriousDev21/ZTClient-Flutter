@@ -39,10 +39,19 @@ This project follows a **Layered Architecture** approach that enforces separatio
 
 The project is divided into the following layers:
 
-- **Presentation Layer**: Handles the UI and user interaction.
-- **Application Layer**: Manages state and business logic through Riverpod providers.
-- **Domain Layer**: Contains the core business logic, including models and error handling.
-- **Data Layer**: Responsible for interacting with external services like the VPN daemon or token repositories.
+### 1. **Presentation Layer**
+Handles the UI and user interaction. It contains the `VpnActionNotifier`, which orchestrates the flow of data from repositories and services to the UI, ensuring that the VPN status and actions (connect/disconnect) are properly handled.
+
+### 2. **Application Layer**
+Manages the state and provides access to repositories and services using `Riverpod` providers. This layer includes the `RepositoryProvider` and `ServiceProvider`, which offer a clean and modular way to access services like `SocketService`, `AuthService`, and repositories like `ConnectionRepository` and `TokenRepository`.
+
+### 3. **Domain Layer**
+Contains the core business logic and models. This layer includes business-critical elements such as `DaemonStatusState` and `AuthToken`, and handles domain-related logic, including error handling with custom exceptions (e.g., `DataSourceException`).
+
+### 4. **Data Layer**
+Responsible for interacting with external services such as the VPN daemon and secure token storage. This layer contains the actual implementation of repositories like `ConnectionRepository` (for VPN control) and `TokenRepository` (for managing authentication tokens).
+
+
 
 The following diagram illustrates the flow of data and interactions between these layers:
 ![Architecture Diagram](../diagrams/component-diagram.png)
