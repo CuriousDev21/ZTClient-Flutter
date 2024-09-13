@@ -19,7 +19,6 @@ class ResponsiveCenter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use Center as it has *unconstrained* width
     return Center(
       child: SizedBox(
         width: maxContentWidth,

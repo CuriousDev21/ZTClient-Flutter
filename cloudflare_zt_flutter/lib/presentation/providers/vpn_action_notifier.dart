@@ -11,12 +11,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'vpn_action_notifier.freezed.dart';
 part 'vpn_action_notifier.g.dart';
 
-/// Notifier that handles the VPN actions
-///  - Connect to VPN Daemon
-/// - Disconnect from VPN Daemon
-/// - Fetch the current status of the VPN Daemon
-/// - Listen to the status of the VPN Daemon
-/// - Notify the UI about the status of the VPN Daemon
+/// Notifier that handles VPN actions such as connecting, disconnecting, and checking the status of the VPN daemon.
+///
+/// This class periodically polls the VPN daemon for its current status and notifies
+/// the UI about the connection status.
 @riverpod
 class VpnActionNotifier extends _$VpnActionNotifier {
   StreamSubscription? _sub;
@@ -32,20 +30,65 @@ class VpnActionNotifier extends _$VpnActionNotifier {
     );
   }
 
+  /// Connects to the VPN daemon.
+  Future<void> connect() async {
+    _sub?.cancel();
+    state = const AsyncLoading();
+
+    try {
+      final tokenRepo = ref.read(RepositoryProvider.token);
+      final vpnRepo = ref.read(RepositoryProvider.vpn);
+      final authToken = await tokenRepo.getAuthToken() ?? await _fetchAndCacheAuthToken(tokenRepo);
+
+      await vpnRepo.connect(authToken.token);
+
+      state = const AsyncData(
+        DaemonStatusState(
+          statusMessage: 'Connected!',
+          isConnected: true,
+        ),
+      );
+    } on DataSourceException catch (e, s) {
+      state = AsyncValue.error(e.message ?? 'Failed to connect to VPN', s);
+    }
+
+    _listenToStream();
+  }
+
+  /// Disconnects from the VPN daemon.
+  Future<void> disconnect() async {
+    _sub?.cancel();
+    state = const AsyncLoading();
+
+    try {
+      final vpnRepo = ref.read(RepositoryProvider.vpn);
+      await vpnRepo.disconnect();
+
+      state = const AsyncData(
+        DaemonStatusState(
+          statusMessage: 'Disconnected',
+          isConnected: false,
+        ),
+      );
+    } on DataSourceException catch (e, s) {
+      state = AsyncValue.error(e.message ?? 'Failed to disconnect from VPN', s);
+    }
+
+    _listenToStream();
+  }
+
+  /// Listens to the stream that periodically fetches the status of the VPN daemon.
   void _listenToStream() => _sub = Stream.periodic(const Duration(seconds: 5)).listen((_) async {
         final newState = await AsyncValue.guard(() => _fetchStatus());
         if (_sub?.isPaused == false) state = newState;
       });
 
+  /// Fetches the current status of the VPN daemon.
   Future<DaemonStatusState> _fetchStatus() async {
-    // Ensure the timer is cleaned up when the provider is disposed
-
-    // Perform the actual status check
     final vpnRepo = ref.read(RepositoryProvider.vpn);
     try {
       final status = await vpnRepo.getStatus();
 
-      // Handle the successful "disconnected" with an error message case
       return status.map(
         connected: (_) => const DaemonStatusState(
           statusMessage: 'Connected!',
@@ -56,84 +99,21 @@ class VpnActionNotifier extends _$VpnActionNotifier {
           isConnected: false,
         ),
         error: (error) => DaemonStatusState(
-          statusMessage: 'Disconnected', // Even if the status is "error", the VPN is still disconnected
+          statusMessage: 'Disconnected',
           errorMessage: error.message,
           isConnected: false,
         ),
       );
     } on DataSourceException catch (e) {
-      // Return a DaemonStatusState with the error message
       return DaemonStatusState(
         statusMessage: 'Disconnected',
         errorMessage: e.message ?? 'Failed to check VPN status',
         isConnected: false,
       );
-    } catch (e) {
-      // Return a DaemonStatusState with a generic error message
-      return const DaemonStatusState(
-        statusMessage: 'Disconnected',
-        errorMessage: 'Failed to check VPN status',
-        isConnected: false,
-      );
     }
   }
 
-  // Connect to VPN Daemon
-  Future<void> connect() async {
-    _sub?.cancel();
-    state = const AsyncLoading(); // Set loading state while performing the action
-
-    try {
-      final tokenRepo = ref.read(RepositoryProvider.token);
-      final vpnRepo = ref.read(RepositoryProvider.vpn);
-
-      final authToken = await tokenRepo.getAuthToken() ?? await _fetchAndCacheAuthToken(tokenRepo);
-
-      await vpnRepo.connect(authToken.token);
-
-      // Set the connected state after successful connection
-      state = const AsyncData(
-        DaemonStatusState(
-          statusMessage: 'Connected!',
-          isConnected: true,
-        ),
-      );
-    } on DataSourceException catch (e, s) {
-      // Set the error state with the error message
-      state = AsyncValue.error(e.message ?? 'Failed to connect to VPN', s);
-    } catch (e, s) {
-      state = AsyncValue.error('Failed to connect to VPN', s);
-    }
-
-    _listenToStream();
-  }
-
-  // Disconnect from VPN Daemon
-  Future<void> disconnect() async {
-    _sub?.cancel();
-    state = const AsyncLoading();
-
-    try {
-      final vpnRepo = ref.read(RepositoryProvider.vpn);
-      await vpnRepo.disconnect();
-
-      // Set the disconnected state after successful disconnection
-      state = const AsyncData(
-        DaemonStatusState(
-          statusMessage: 'Disconnected',
-          isConnected: false,
-        ),
-      );
-    } on DataSourceException catch (e, s) {
-      // Set the error state with the error message
-      state = AsyncValue.error(e.message ?? 'Failed to disconnect from VPN', s);
-    } catch (e, s) {
-      state = AsyncValue.error('Failed to disconnect from the VPN', s);
-    }
-    _listenToStream();
-  }
-
-  // Helper method to fetch and cache the token
+  /// Fetches and caches a new authentication token.
   Future<AuthToken> _fetchAndCacheAuthToken(TokenRepository tokenRepo) async {
     final authService = ref.read(ServiceProvider.auth);
     final newToken = await authService.getRemoteAuthToken();

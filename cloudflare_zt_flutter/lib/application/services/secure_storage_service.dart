@@ -5,6 +5,7 @@ final secureStorageServiceProvider = Provider<SecureStorageService>((ref) {
   return SecureStorageService.instance;
 });
 
+/// Service responsible for handling secure storage operations. This service is used to store and retrieve sensitive data securely.
 class SecureStorageService {
   SecureStorageService._();
 

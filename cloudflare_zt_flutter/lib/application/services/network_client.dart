@@ -5,6 +5,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 final remoteDataSourceProvider = Provider<NetworkClient>((ref) => NetworkClient());
 
+/// A network client responsible for making REST API requests using the Dio library.
+///
+/// [NetworkClient] supports various HTTP methods such as GET, POST, PUT, DELETE, and PATCH.
 class NetworkClient {
   final Dio dio = Dio(
     BaseOptions(
@@ -15,6 +18,9 @@ class NetworkClient {
 
   final CancelToken cancelToken = CancelToken();
 
+  /// Invokes an API request with the specified [url], [requestType], and optional parameters.
+  ///
+  /// Throws [DioNetworkingException] if an error occurs during the request.
   Future<Response> invoke(
     String url,
     RequestType requestType, {
@@ -47,6 +53,7 @@ class NetworkClient {
     }
   }
 
+  /// Cancels any ongoing API requests.
   void cancelRequests() {
     logger.info("Cancelling all requests.");
     cancelToken.cancel("Request was cancelled");

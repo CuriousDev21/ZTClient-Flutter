@@ -11,6 +11,8 @@ final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService(networkClient);
 });
 
+/// Service responsible for handling authentication-related operations.
+/// This service is used to fetch the auth token from the server.
 class AuthService {
   final NetworkClient _networkClient;
 

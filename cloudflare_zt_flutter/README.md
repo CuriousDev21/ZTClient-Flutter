@@ -61,32 +61,46 @@ The following diagram illustrates the flow of data and interactions between thes
 ```
 lib/
  ├── application/
- │    └── providers/
- │         ├── daemon_error_provider.dart
- │         ├── status_check_notifier.dart
- │         ├── vpn_action_notifier.dart
+ │    ├── providers/
+ │    │    ├── repository.abs.dart
+ │    │    └── service.abs.dart
+ │    └── services/
+ │         ├── api_config.dart
+ │         ├── auth_service.dart
+ │         ├── network_client.dart
+ │         ├── secure_storage_service.dart
+ │         └── socket_service.dart
  ├── core/
- │    └── utils/
- │         └── logger.dart
+ │    ├── utils/
+ │    │    ├── constants/
+ │    │    │    ├── dimensions.dart
+ │    │    │    └── display_breakpoint.dart
+ │    │    ├── logger/
+ │    │    │    └── app_logger.dart
+ │    │    └── theme/
+ │    │         └── app_style.dart
+ │    └── widgets/
+ │         └── responsive_container.dart
  ├── data/
  │    ├── repositories/
  │    │    ├── daemon_connection_repository.dart
  │    │    └── token_repository.dart
- │    └── services/
- │         ├── api_config.dart
- │         ├── auth_service.dart
- │         ├── socket_service.dart
  ├── domain/
  │    ├── errors/
  │    │    ├── data_source_exception.dart
  │    │    └── network_exception.dart
  │    └── models/
  │         ├── auth/
- │         └── daemon/
+ │         ├── daemon/
+ │         └── daemon_status.dart
  ├── presentation/
+ │    ├── providers/
+ │    │    ├── vpn_action_notifier.dart
+ │    │    └── vpn_action_notifier.freezed.dart
  │    └── screens/
  │         └── daemon_status_screen.dart
  └── main.dart
+
 ```
 
 ### Key Folders:

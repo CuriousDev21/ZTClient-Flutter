@@ -14,14 +14,33 @@ final socketServiceProvider = Provider<SocketService>((ref) {
   return SocketService();
 });
 
+/// Service responsible for handling communication with the VPN daemon.
+///
+/// This service is used to connect, disconnect, and get the status of the VPN.
+/// It communicates with the daemon over a Unix socket.
 class SocketService {
+  /// The path of the Unix socket used to communicate with the VPN daemon.
   final String _socketPath;
+
+  /// The socket instance used for communication.
   Socket? _socket;
+
+  /// Buffer to hold incoming data from the socket.
   final List<int> _buffer = [];
+
+  /// Stream subscription to listen to data from the socket.
   StreamSubscription<Uint8List>? _socketSubscription;
+
+  /// Completer used to wait for and handle responses from the daemon.
   Completer<DaemonResponse>? _responseCompleter;
+
+  /// A function that establishes a connection to the daemon via the Unix socket.
   final Future<Socket> Function(InternetAddress address, int port) _connect;
 
+  /// Constructor for [SocketService].
+  ///
+  /// Optionally, a custom [socketPath] or [connect] method can be provided. If
+  /// not, defaults to `/tmp/daemon-lite` and [Socket.connect].
   SocketService(
       {String socketPath = "/tmp/daemon-lite", Future<Socket> Function(InternetAddress, int)? connect, Socket? socket})
       : _socketPath = socketPath,
@@ -29,7 +48,12 @@ class SocketService {
     _socket = socket;
   }
 
-  /// Ensure the connection to the daemon is established.
+  /// Ensures that the connection to the daemon is established.
+  ///
+  /// If the connection is already active, it is reused. Otherwise, the method
+  /// attempts to open a new connection to the daemon.
+  ///
+  /// Throws [DataSourceException] if the connection fails.
   Future<void> _ensureConnected() async {
     if (_socket != null) return; // Reuse existing connection if available
 
@@ -48,7 +72,9 @@ class SocketService {
     }
   }
 
-  /// Start listening to the socket.
+  /// Starts listening to the Unix socket for responses from the daemon.
+  ///
+  /// The data received from the socket is processed in [_processData].
   void _listenToSocket() {
     logger.debug("Listening for responses from the daemon.");
     _socketSubscription = _socket?.listen(
@@ -65,7 +91,7 @@ class SocketService {
     );
   }
 
-  /// Close the socket connection.
+  /// Closes the connection to the daemon and cleans up resources.
   void _closeSocket() {
     logger.info("Closing socket connection.");
     _socketSubscription?.cancel();
@@ -73,7 +99,9 @@ class SocketService {
     _socket = null;
   }
 
-  /// Process incoming data from the socket.
+  /// Processes incoming data from the daemon and completes the response.
+  ///
+  /// The data is added to a buffer and parsed using [_readResponseFromBuffer].
   void _processData(Uint8List data) {
     logger.debug("Processing data from the socket.");
     _buffer.addAll(data);
@@ -98,7 +126,10 @@ class SocketService {
     }
   }
 
-  /// Read response data from the buffer.
+  /// Reads the response from the daemon from the buffered data.
+  ///
+  /// Returns a [DaemonResponse] object or throws a [DataSourceException] if an
+  /// error occurs.
   DaemonResponse? _readResponseFromBuffer() {
     if (_buffer.length < 8) return null; // Wait for the 8-byte size header
 
@@ -118,28 +149,19 @@ class SocketService {
     final response = DaemonResponse.fromJson(responseJson);
     logger.debug("Parsed DaemonResponse: $response");
 
-    // Check for errors or special cases in the response
+    // Handle error responses from the daemon
     if (response.status == DaemonResponseStatus.error) {
-      // Handle error response
       logger.warning("Daemon responded with error: ${response.message}");
       throw DataSourceException.fromDaemonResponse(response);
-    } else if (response.status == DaemonResponseStatus.success) {
-      final daemonStatus = response.data?.daemonStatus;
-      final daemonMessage = response.data?.message;
-
-      // Check if the daemon is disconnected
-      if (daemonStatus == DaemonConnectionStatus.disconnected.name && daemonMessage != null) {
-        logger.warning("Daemon disconnected with message: $daemonMessage");
-        throw DataSourceException.serverError(
-          message: daemonMessage,
-        );
-      }
     }
 
     return response;
   }
 
-  /// Send a request payload to the daemon and wait for the response.
+  /// Sends a request to the daemon and waits for a response.
+  ///
+  /// Takes a [DaemonRequest] object as input and sends it to the daemon over the
+  /// Unix socket. Returns the parsed [DaemonResponse].
   Future<DaemonResponse> _sendRequest(DaemonRequest request) async {
     logger.info("Sending request to the daemon: ${request.toJsonString()}");
     await _ensureConnected();
@@ -159,25 +181,28 @@ class SocketService {
       throw DataSourceException.serverError(message: 'Failed to send request to the daemon: $e');
     }
 
-    // Wait for the response to be processed
     return _responseCompleter!.future;
   }
 
-  /// Connect to the VPN daemon using the auth token.
+  /// Connects to the VPN daemon using the provided auth token.
+  ///
+  /// [authToken] is the authentication token used to initiate the connection.
   Future<void> connect(String authToken) async {
     logger.info("Attempting to connect to VPN with token: $authToken");
     final connectRequest = DaemonRequest.connect(int.parse(authToken));
     await _sendRequest(connectRequest);
   }
 
-  /// Disconnect from the VPN daemon.
+  /// Disconnects from the VPN daemon.
   Future<void> disconnect() async {
     logger.info("Attempting to disconnect from the VPN.");
     final disconnectRequest = DaemonRequest.disconnect();
     await _sendRequest(disconnectRequest);
   }
 
-  /// Get the current status of the VPN daemon.
+  /// Fetches the current status of the VPN daemon.
+  ///
+  /// Returns a [DaemonStatus] object representing the current state of the VPN.
   Future<DaemonStatus> getStatus() async {
     logger.info("Checking VPN daemon status.");
     final statusRequest = DaemonRequest.getStatus();
@@ -185,7 +210,7 @@ class SocketService {
     return DaemonStatus.fromDataResponse(response.data!.toJson());
   }
 
-  /// Dispose of the socket connection when done.
+  /// Disposes of the socket connection and cleans up resources.
   void dispose() {
     logger.info("Disposing of the socket connection.");
     _closeSocket();
