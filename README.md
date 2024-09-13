@@ -1,4 +1,4 @@
-# VPN Control Application
+# ZTClient Flutter - VPN Control Application
 
 This Flutter application provides a user-friendly interface for controlling a VPN daemon through socket communication, displaying the current connection status, and handling VPN actions such as connect and disconnect. The app polls the daemon status every 5 seconds and manages the lifetime of the authentication token to ensure smooth VPN operations.
 
