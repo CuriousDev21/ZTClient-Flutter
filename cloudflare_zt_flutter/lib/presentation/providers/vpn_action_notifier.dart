@@ -42,7 +42,7 @@ class VpnActionNotifier extends _$VpnActionNotifier {
       // Handle the successful "disconnected" with an error message case
       return status.map(
         connected: (_) => const DaemonStatusState(
-          statusMessage: 'Connected',
+          statusMessage: 'Connected!',
           isConnected: true,
         ),
         disconnected: (_) => const DaemonStatusState(
@@ -50,7 +50,7 @@ class VpnActionNotifier extends _$VpnActionNotifier {
           isConnected: false,
         ),
         error: (error) => DaemonStatusState(
-          statusMessage: 'Disconnected', // Consider disconnected with an error
+          statusMessage: 'Disconnected', // Even if the status is "error", the VPN is still disconnected
           errorMessage: error.message,
           isConnected: false,
         ),
@@ -88,7 +88,7 @@ class VpnActionNotifier extends _$VpnActionNotifier {
       // Set the connected state after successful connection
       state = const AsyncData(
         DaemonStatusState(
-          statusMessage: 'Connected',
+          statusMessage: 'Connected!',
           isConnected: true,
         ),
       );
@@ -122,7 +122,7 @@ class VpnActionNotifier extends _$VpnActionNotifier {
       // Set the error state with the error message
       state = AsyncValue.error(e.message ?? 'Failed to disconnect from VPN', s);
     } catch (e, s) {
-      state = AsyncValue.error('Failed to discconnect from the VPN', s);
+      state = AsyncValue.error('Failed to disconnect from the VPN', s);
     }
     _listenToStream();
   }
@@ -130,7 +130,7 @@ class VpnActionNotifier extends _$VpnActionNotifier {
   // Helper method to fetch and cache the token
   Future<AuthToken> _fetchAndCacheAuthToken(TokenRepository tokenRepo) async {
     final authService = ref.read(ServiceProvider.auth);
-    final newToken = await authService.getAuthToken();
+    final newToken = await authService.getRemoteAuthToken();
     await tokenRepo.cacheAuthToken(newToken);
     return newToken;
   }
