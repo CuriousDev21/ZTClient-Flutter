@@ -1,7 +1,3 @@
-Here is the updated README with instructions on starting the `daemon-lite` from the terminal:
-
----
-
 # VPN Control Application
 
 This Flutter application provides a user-friendly interface for controlling a VPN daemon through socket communication, displaying the current connection status, and handling VPN actions such as connect and disconnect. The app polls the daemon status every 5 seconds and manages the lifetime of the authentication token to ensure smooth VPN operations.
@@ -17,6 +13,8 @@ This Flutter application provides a user-friendly interface for controlling a VP
 - [Running the App](#running-the-app)
 - [Running the Daemon-Lite](#running-the-daemon-lite)
 - [Testing](#testing)
+- [macOS Packaging](#macos-packaging)
+- [Limitations & Future Work](#limitations--future-work)
 
 ## Features
 - **Daemon Communication**: Interacts with a mock VPN daemon via UNIX sockets.
@@ -34,34 +32,35 @@ This Flutter application provides a user-friendly interface for controlling a VP
 ## Recommended IDE
 The recommended IDE for working on this project is **Visual Studio Code**.
 
-### Steps:
-1. Install **Visual Studio Code**: [Download here](https://code.visualstudio.com/).
-2. Install the following plugins in VS Code:
-   - **Flutter Plugin**: Provides Flutter support in VS Code.
-   - **Dart Plugin**: Provides Dart language support and tools.
-
-   To install these plugins:
-   - Open VS Code.
-   - Go to the **Extensions** view by clicking the square icon in the Activity Bar.
-   - Search for `Flutter` and `Dart`, then click **Install** on both.
-
-3. Ensure the **Flutter SDK** is properly configured in VS Code:
-   - Open the command palette (`Cmd + Shift + P` or `Ctrl + Shift + P`).
-   - Type `Flutter: Select SDK` and set the path to your Flutter SDK.
-
 ## Architecture
-The project follows a clean architecture approach with the following layers:
+
+This project follows a **Clean Architecture** approach that enforces separation of concerns, making the code more modular, scalable, and testable.
+
+The project is divided into the following layers:
+
+- **Presentation Layer**: Handles the UI and user interaction.
+- **Application Layer**: Manages state and business logic through Riverpod providers.
 - **Domain Layer**: Contains the core business logic, including models and error handling.
 - **Data Layer**: Responsible for interacting with external services like the VPN daemon or token repositories.
-- **Application Layer**: Manages state and business logic through Riverpod providers.
-- **Presentation Layer**: Handles the UI and user interaction.
 
-### Key Concepts:
-- **Riverpod**: Used for state management.
-- **Freezed**: Used for immutability, union types, and error modeling.
-- **Debouncing**: Implemented to prevent multiple connect/disconnect actions in quick succession.
+The following diagram illustrates the flow of data and interactions between these layers:
+
+```mermaid
+graph TD
+    A[Presentation Layer] -->|Riverpod Notifiers| B[Application Layer]
+    B --> C[Domain Layer]
+    C --> D[Data Layer: Repositories and DTOs]
+    D --> E[Data Sources]
+    
+    A --> F[UI Widgets]
+    B --> G[AsyncNotifiers]
+    C --> H[Models: DaemonResponse, AuthToken]
+    D --> I[Repositories: DaemonConnectionRepository, TokenRepository]
+    E --> J[Unix Socket: Daemon]
+```
 
 ## Folder Structure
+
 ```
 lib/
  ├── application/
@@ -115,6 +114,7 @@ The following packages are used in the project:
 | `mocktail`              | Unit testing with mocks.                                     |
 
 ## Setup and Installation
+
 ### Prerequisites
 - Ensure you have **Flutter** installed:
   ```bash
@@ -203,3 +203,29 @@ flutter test
 - **Daemon Interaction**: Ensures that the app can successfully communicate with the VPN daemon.
 - **Error Handling**: Ensures that errors from the daemon are handled appropriately and shown to the user.
 - **Token Management**: Ensures the auth token is fetched, cached, and refreshed as needed.
+
+## macOS Packaging
+
+The application has already been packaged as a **DMG (Disk Image)** file, which is included in the project repository under the `build/macos/` directory.
+
+### Steps to Install the DMG:
+1. Navigate to the `build/macos/` directory.
+2. Find the file `VPNControlApp.dmg`.
+3. Double-click to open the DMG file.
+4. Drag and drop the app into your Applications folder.
+
+This allows users to easily install the app on macOS without needing to generate the DMG file themselves.
+
+## Limitations & Future Work
+
+### Limitations:
+- The app runs perfectly on macOS and iOS. However, on Android, the `/tmp` path is reserved and cannot be used for socket communication. Altering the daemon to use another directory would have been required to make it work on Android emulators.
+- Packaging the app as `.pkg` for macOS requires additional notarization, which wasn't possible without a Developer ID Installer.
+
+### Future Work:
+- **Support for Android**: In a real-world scenario, modifying the daemon to
+
+ use a different socket path (instead of `/tmp`) would be essential for supporting Android.
+- **Daemon Code Refactor**: Potential improvements to the daemon itself could allow it to be more portable across different operating systems.
+- **Notifications on Status Changes**: Adding OS-level notifications for VPN status changes would enhance user experience.
+- **Improve Error Handling**: More advanced error handling mechanisms, such as retries with exponential backoff, could be introduced for robustness.
