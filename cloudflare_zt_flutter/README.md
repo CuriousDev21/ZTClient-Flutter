@@ -34,7 +34,7 @@ The recommended IDE for working on this project is **Visual Studio Code**.
 
 ## Architecture
 
-This project follows a **Clean Architecture** approach that enforces separation of concerns, making the code more modular, scalable, and testable.
+This project follows a **Layered Architecture** approach that enforces separation of concerns, making the code more modular, scalable, and testable.
 
 The project is divided into the following layers:
 
@@ -44,20 +44,7 @@ The project is divided into the following layers:
 - **Data Layer**: Responsible for interacting with external services like the VPN daemon or token repositories.
 
 The following diagram illustrates the flow of data and interactions between these layers:
-
-```mermaid
-graph TD
-    A[Presentation Layer] -->|Riverpod Notifiers| B[Application Layer]
-    B --> C[Domain Layer]
-    C --> D[Data Layer: Repositories and DTOs]
-    D --> E[Data Sources]
-    
-    A --> F[UI Widgets]
-    B --> G[AsyncNotifiers]
-    C --> H[Models: DaemonResponse, AuthToken]
-    D --> I[Repositories: DaemonConnectionRepository, TokenRepository]
-    E --> J[Unix Socket: Daemon]
-```
+![Architecture Diagram](../diagrams/component-diagram.png)
 
 ## Folder Structure
 
