@@ -52,6 +52,12 @@ class TokenRepository {
     return authToken;
   }
 
+  /// Handle token discard after a successful connection
+  Future<void> onSuccessfulConnection() async {
+    logger.info("Connection successful. Discarding auth token.");
+    await discardToken();
+  }
+
   /// Caches a new authentication token and starts the expiration timer.
   Future<void> cacheAuthToken(AuthToken authToken) async {
     logger.info("Caching new auth token.");
