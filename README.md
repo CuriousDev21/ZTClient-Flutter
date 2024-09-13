@@ -179,7 +179,7 @@ Before running the application, you must start the mock `daemon-lite` on your sy
    ```
 
 ## Testing
-Unit tests are provided using the `mocktail` package for mocking service layers.
+Unit tests are provided using the `mocktail` package for mocking service and repository layers.
 
 Run all tests:
 ```bash
@@ -207,7 +207,7 @@ This allows users to easily install the app on macOS without needing to generate
 
 ### Limitations:
 - The app runs perfectly on macOS and iOS. However, on Android, the `/tmp` path is reserved and cannot be used for socket communication. Altering the daemon to use another directory would have been required to make it work on Android emulators.
-- Packaging the app as `.pkg` for macOS requires additional notarization, which wasn't possible without a Developer ID Installer.
+- Packaging the app as `.pkg` for macOS requires additional notarization, which wasn't possible without a Developer ID Installer Certificate.
 
 ### Future Work:
 - **Support for Android**: In a real-world scenario, modifying the daemon to
@@ -216,3 +216,5 @@ This allows users to easily install the app on macOS without needing to generate
 - **Daemon Code Refactor**: Potential improvements to the daemon itself could allow it to be more portable across different operating systems.
 - **Notifications on Status Changes**: Adding OS-level notifications for VPN status changes would enhance user experience.
 - **Improve Error Handling**: More advanced error handling mechanisms, such as retries with exponential backoff, could be introduced for robustness.
+- **Integration Testing**: Using tools like `Patrol` and `Patrol_CLI` to perform integration tests on the app's UI and interactions with a daemon instance.
+- **Localization Support**: Adding support for multiple languages would make the app more accessible to a wider audience.
