@@ -5,7 +5,7 @@ final secureStorageServiceProvider = Provider<SecureStorageService>((ref) {
   return SecureStorageService.instance;
 });
 
-final class SecureStorageService {
+class SecureStorageService {
   SecureStorageService._();
 
   static final _instance = SecureStorageService._();

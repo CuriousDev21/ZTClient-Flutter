@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:cloudflare_zt_flutter/core/utils/logger/app_logger.dart';
 import 'package:cloudflare_zt_flutter/domain/errors/data_source_exception.dart';
 import 'package:cloudflare_zt_flutter/domain/models/daemon/daemon_request.dart';
+import 'package:cloudflare_zt_flutter/domain/models/daemon/daemon_response.dart';
 import 'package:cloudflare_zt_flutter/domain/models/daemon/daemon_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -14,11 +15,19 @@ final socketServiceProvider = Provider<SocketService>((ref) {
 });
 
 class SocketService {
-  final String _socketPath = "/tmp/daemon-lite";
+  final String _socketPath;
   Socket? _socket;
   final List<int> _buffer = [];
   StreamSubscription<Uint8List>? _socketSubscription;
-  Completer<Map<String, dynamic>>? _responseCompleter;
+  Completer<DaemonResponse>? _responseCompleter;
+  final Future<Socket> Function(InternetAddress address, int port) _connect;
+
+  SocketService(
+      {String socketPath = "/tmp/daemon-lite", Future<Socket> Function(InternetAddress, int)? connect, Socket? socket})
+      : _socketPath = socketPath,
+        _connect = connect ?? Socket.connect {
+    _socket = socket;
+  }
 
   /// Ensure the connection to the daemon is established.
   Future<void> _ensureConnected() async {
@@ -27,12 +36,15 @@ class SocketService {
     try {
       logger.info("Attempting to connect to the daemon.");
       var address = InternetAddress(_socketPath, type: InternetAddressType.unix);
-      _socket = await Socket.connect(address, 0);
+      _socket = await _connect(address, 0);
       logger.info("Successfully connected to the daemon.");
       _listenToSocket(); // Start listening to the socket for responses
     } on SocketException catch (e) {
       logger.error("Failed to connect to the daemon: ${e.message}");
       throw DataSourceException.connection(message: 'Failed to connect to the daemon: ${e.message}');
+    } catch (e) {
+      logger.error("Generic error while connecting to the daemon: $e");
+      throw DataSourceException.serverError(message: 'Failed to connect to the daemon: $e');
     }
   }
 
@@ -87,7 +99,7 @@ class SocketService {
   }
 
   /// Read response data from the buffer.
-  Map<String, dynamic>? _readResponseFromBuffer() {
+  DaemonResponse? _readResponseFromBuffer() {
     if (_buffer.length < 8) return null; // Wait for the 8-byte size header
 
     // Read the size of the payload
@@ -102,35 +114,41 @@ class SocketService {
     final payload = utf8.decode(payloadBytes);
 
     // Parse the JSON response
-    final response = json.decode(payload) as Map<String, dynamic>;
-    logger.debug("Parsed JSON response: $response");
+    final responseJson = json.decode(payload) as Map<String, dynamic>;
+    final response = DaemonResponse.fromJson(responseJson);
+    logger.debug("Parsed DaemonResponse: $response");
 
     // Check for errors or special cases in the response
-    if (response['status'] == 'error') {
-      logger.warning("Daemon responded with error: ${response['message']}");
+    if (response.status == DaemonResponseStatus.error) {
+      // Handle error response
+      logger.warning("Daemon responded with error: ${response.message}");
       throw DataSourceException.fromDaemonResponse(response);
-    } else if (response['status'] == 'success' &&
-        response['data']['daemon_status'] == 'disconnected' &&
-        response['data']['message'] != null) {
-      logger.warning("Daemon disconnected with message: ${response['data']['message']}");
-      throw DataSourceException.serverError(
-        message: response['data']['message'] ?? 'Unknown disconnection issue',
-      );
+    } else if (response.status == DaemonResponseStatus.success) {
+      final daemonStatus = response.data?.daemonStatus;
+      final daemonMessage = response.data?.message;
+
+      // Check if the daemon is disconnected
+      if (daemonStatus == DaemonConnectionStatus.disconnected.name && daemonMessage != null) {
+        logger.warning("Daemon disconnected with message: $daemonMessage");
+        throw DataSourceException.serverError(
+          message: daemonMessage,
+        );
+      }
     }
 
     return response;
   }
 
   /// Send a request payload to the daemon and wait for the response.
-  Future<Map<String, dynamic>> _sendRequest(DaemonRequest request) async {
+  Future<DaemonResponse> _sendRequest(DaemonRequest request) async {
     logger.info("Sending request to the daemon: ${request.toJsonString()}");
     await _ensureConnected();
 
     final payloadData = utf8.encode(request.toJsonString());
     final payloadSize = payloadData.length;
-    final sizeBytes = Uint8List(8)..buffer.asByteData().setInt64(0, payloadSize, Endian.little);
+    final sizeBytes = Uint8List(8)..buffer.asByteData().setInt64(0, payloadSize, Endian.host);
 
-    _responseCompleter = Completer<Map<String, dynamic>>();
+    _responseCompleter = Completer<DaemonResponse>();
 
     try {
       _socket!.add(sizeBytes);
@@ -164,7 +182,7 @@ class SocketService {
     logger.info("Checking VPN daemon status.");
     final statusRequest = DaemonRequest.getStatus();
     final response = await _sendRequest(statusRequest);
-    return DaemonStatus.fromJson(response['data']);
+    return DaemonStatus.fromDataResponse(response.data!.toJson());
   }
 
   /// Dispose of the socket connection when done.

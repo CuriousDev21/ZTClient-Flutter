@@ -16,7 +16,7 @@ class AuthService {
 
   AuthService(this._networkClient);
 
-  Future<AuthToken> getAuthToken() async {
+  Future<AuthToken> getRemoteAuthToken() async {
     try {
       final response = await _networkClient.invoke(
         APIEndpoints.registration,
@@ -31,6 +31,7 @@ class AuthService {
         timestamp: DateTime.now(),
       );
     } on DioNetworkingException catch (e) {
+      logger.error("Registration failed: ${e.message}");
       throw DataSourceException.fromDio(e);
     }
   }
