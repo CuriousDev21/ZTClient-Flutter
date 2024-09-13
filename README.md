@@ -25,12 +25,13 @@ This Flutter application provides a user-friendly interface for controlling a VP
 - **Token Management**: Manages the lifetime of the authentication token (valid for 5 minutes).
 
 ## Requirements
+- **macOS/Linux**: Required to use UNIX sockets for communication with the daemon.
 - **Flutter**: Version 3.10.0 or above
 - **Dart**: Version 3.0 or above
-- **macOS/Linux**: Required to use UNIX sockets for communication with the daemon.
+- **Xcode**: Required for building and running the app on iOS.
 
 ## Recommended IDE
-The recommended IDE for working on this project is **Visual Studio Code**.
+The recommended IDE for working on this project is **Visual Studio Code** with dart and flutter plugins installed.
 
 ## Architecture
 
@@ -103,17 +104,12 @@ The following packages are used in the project:
 ## Setup and Installation
 
 ### Prerequisites
-- Ensure you have **Flutter** installed:
+- Ensure your system is set up correctly by running:
   ```bash
-  flutter --version
+  flutter doctor
   ```
-  Confirm it is at least version `3.10.0`.
 
-- Ensure you have **Dart** installed:
-  ```bash
-  dart --version
-  ```
-  Confirm it is at least version `3.0.0`.
+  This command will check if your Flutter and Dart versions are installed and correctly configured, and it will provide information about any missing dependencies. Ensure all checks pass.
 
 ### Installation Steps
 1. **Clone the repository**:
@@ -133,14 +129,32 @@ The following packages are used in the project:
    ```
 
 ## Running the App
-To run the app, specify the platform target (e.g., Android, iOS, macOS):
+
+Before running the app, it's a good idea to check the connected devices or simulators available using the following command:
 
 ```bash
-flutter run -d ios       # iOS
-flutter run -d android   # Android
-flutter run -d macos     # macOS Desktop
-flutter run -d chrome    # Web (if enabled)
+flutter devices
 ```
+
+This will list all connected devices and simulators. For example, if you're targeting iOS, you will get a list of available iOS simulators, and you can choose one to run the app. Use the specific device ID shown in the `flutter devices` output.
+
+### Run Command
+
+To run the app on a specific device or simulator, use the following command (replace `device_id` with the actual device or simulator ID you got from `flutter devices`):
+
+```bash
+flutter run -d device_id
+```
+
+However, if you're targeting **macOS**, you can run the following command directly:
+
+```bash
+flutter run -d macos
+```
+
+### Alternative: Use Visual Studio Code
+
+Alternatively, you can use the **Build** button in Visual Studio Code, which automatically detects and builds the app for the selected device or simulator. This is an easier approach if you are working in the Visual Studio Code environment.
 
 ## Running the Daemon-Lite
 Before running the application, you must start the mock `daemon-lite` on your system. This provides the VPN daemon service the app interacts with.
@@ -193,15 +207,48 @@ flutter test
 
 ## macOS Packaging
 
-The application has already been packaged as a **DMG (Disk Image)** file, which is included in the project repository under the `build/macos/` directory.
+The application has already been packaged as a **DMG (Disk Image)** file, which is included in the `releases/` folder of this repository.
 
 ### Steps to Install the DMG:
-1. Navigate to the `build/macos/` directory.
-2. Find the file `VPNControlApp.dmg`.
+1. Navigate to the `releases/` folder in this repository.
+2. Find the file `VPNControl-Flutter.dmg`.
 3. Double-click to open the DMG file.
-4. Drag and drop the app into your Applications folder.
+4. Open it directly or Drag and drop the app into your Applications folder.
 
-This allows users to easily install the app on macOS without needing to generate the DMG file themselves.
+### **Important**: macOS Security Warning
+
+Since the application is not signed with an Apple Developer ID, macOS will block the app from opening initially. To bypass this, follow these steps:
+
+1. After downloading and moving the application to your **Applications** folder, try opening the app by **double-clicking**. You will see a warning stating that the app "can't be opened because Apple cannot check it for malicious software."
+   
+2. Open **System Preferences** and navigate to **Security & Privacy**.
+
+3. In the **General** tab, you will see a message that the app was blocked. Click **Open Anyway**.
+
+4. You will now be able to launch the app.
+
+Alternatively, you
+
+ can build the app locally using Flutter:
+
+### Build the macOS App Locally
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/CuriousDev21/ZTClient-Flutter.git
+   cd ZTClient-Flutter
+   ```
+
+2. Run the macOS build command:
+   ```bash
+   flutter build macos
+   ```
+
+3. Navigate to the generated build folder:
+   ```
+   open build/macos/Build/Products/Release/
+   ```
+
+4. Run the app directly from the **Release** folder.
 
 ## Limitations & Future Work
 
@@ -210,9 +257,7 @@ This allows users to easily install the app on macOS without needing to generate
 - Packaging the app as `.pkg` for macOS requires additional notarization, which wasn't possible without a Developer ID Installer Certificate.
 
 ### Future Work:
-- **Support for Android**: In a real-world scenario, modifying the daemon to
-
- use a different socket path (instead of `/tmp`) would be essential for supporting Android.
+- **Support for Android**: In a real-world scenario, modifying the daemon to use a different socket path (instead of `/tmp`) would be essential for supporting Android.
 - **Daemon Code Refactor**: Potential improvements to the daemon itself could allow it to be more portable across different operating systems.
 - **Notifications on Status Changes**: Adding OS-level notifications for VPN status changes would enhance user experience.
 - **Improve Error Handling**: More advanced error handling mechanisms, such as retries with exponential backoff, could be introduced for robustness.
