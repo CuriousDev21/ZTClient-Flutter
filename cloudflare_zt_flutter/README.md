@@ -1,9 +1,3 @@
-Sure! Replacing the separate version checks for Dart and Flutter with the `flutter doctor` command makes the setup more streamlined and thorough.
-
-Here’s the updated README with that change:
-
----
-
 # VPN Control Application
 
 This Flutter application provides a user-friendly interface for controlling a VPN daemon through socket communication, displaying the current connection status, and handling VPN actions such as connect and disconnect. The app polls the daemon status every 5 seconds and manages the lifetime of the authentication token to ensure smooth VPN operations.
@@ -270,6 +264,3 @@ Alternatively, you
 - **Integration Testing**: Using tools like `Patrol` and `Patrol_CLI` to perform integration tests on the app's UI and interactions with a daemon instance.
 - **Localization Support**: Adding support for multiple languages would make the app more accessible to a wider audience.
 
----
-
-This version uses `flutter doctor` to streamline the setup process and ensure that both Flutter and Dart (as well as any other required components) are correctly installed and configured.
