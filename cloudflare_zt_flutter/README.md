@@ -29,6 +29,7 @@ This Flutter application provides a user-friendly interface for controlling a VP
 - **Flutter**: Version 3.10.0 or above
 - **Dart**: Version 3.0 or above
 - **Xcode**: Required for building and running the app on iOS.
+- **Android Studio**: Required for building and running the app on Android*.
 
 ## Recommended IDE
 The recommended IDE for working on this project is **Visual Studio Code** with dart and flutter plugins installed.
