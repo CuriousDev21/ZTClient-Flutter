@@ -57,5 +57,5 @@ class MockSocket extends Mock implements Socket {
   }
 
   @override
-  Future get done => Future.value(); // Simulate completion of socket
+  Future get done => Future.value(); // Simulate socket completion
 }

@@ -5,7 +5,7 @@ import 'package:logging/logging.dart' as logging;
 ///
 /// Usage:
 /// ```dart
-/// logger.info('Hello Sina Box');
+/// logger.info('Hello VPN Tracker');
 /// ```
 final Logger logger = LoggerLogging();
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloudflare_zt_flutter/domain/errors/network_exception.dart';
 import 'package:cloudflare_zt_flutter/domain/models/daemon/daemon_response.dart';
 import 'package:dio/dio.dart';
@@ -35,7 +37,7 @@ class DataSourceException with _$DataSourceException {
     }
 
     return switch (exception.statusCode) {
-      APIResponseCodes.unauthorized => DataSourceException.unauthorized(message: message),
+      HttpStatus.unauthorized => DataSourceException.unauthorized(message: message),
       _ => DataSourceException.unknown(message: message),
     };
   }
@@ -54,14 +56,4 @@ class DataSourceException with _$DataSourceException {
         return DataSourceException.unknown(message: message);
     }
   }
-}
-
-class APIResponseCodes {
-  static const ok = 200;
-  static const multipleChoices = 300;
-  static const badRequest = 400;
-  static const unauthorized = 401;
-  static const forbidden = 403;
-  static const notFound = 404;
-  static const internalServerError = 500;
 }

@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/utils/logger/app_logger.dart';
 
 void main() {
-  // Initialize the logging system
+  // Logger Initialization
   logger.runLogging(() async {
     // Flutter's error logging mechanism to use our logger
     FlutterError.onError = logger.logFlutterError;
@@ -15,11 +15,8 @@ void main() {
     // PlatformDispatcher's error handling (for non-Flutter errors)
     PlatformDispatcher.instance.onError = logger.logPlatformDispatcherError;
 
-    // Any other necessary initializations here
-
     runApp(
       const ProviderScope(
-        // Wrapping the app in ProviderScope for Riverpod
         child: MaterialContext(),
       ),
     );

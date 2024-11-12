@@ -62,7 +62,7 @@ class _DaemonStatusState extends ConsumerState<DaemonStatusScreen> {
                   const SizedBox(height: Sizes.p16),
                   Text(
                     'Checking VPN status...',
-                    style: AppTextStyles.bodyText, // Use bodyText for general information
+                    style: AppTextStyles.bodyText,
                   ),
                 ],
               ),
